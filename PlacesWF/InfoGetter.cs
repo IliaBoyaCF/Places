@@ -96,7 +96,10 @@ public class InfoGetter
         }
     }
 
-    public record LocationPreview(string Name, string Country, double Latitude, double Longitude,
+    public record LocationPreviewDescription(string Name, string Country, string? OSM_key, string? State, 
+                                            string? City, string? Street, string? HouseNumber) { }
+
+    public record LocationPreview(LocationPreviewDescription Description, double Latitude, double Longitude,
         double MinLongitude, double MaxLongitude, double MinLatitude, double MaxLatitude)
     {
         public static LocationPreview ParseFromJson(JsonObject jsonObject)
@@ -131,7 +134,16 @@ public class InfoGetter
                 minLatitude = extent[1].GetValue<double>();
                 maxLatitude = extent[3].GetValue<double>();
             }
-            return new LocationPreview(name, country, latitude, longitude, minLongitude, maxLongitude, minLatitude, maxLatitude);
+
+            string? osmKey = jsonObject["osm_key"]?.GetValue<string>();
+            string? state = jsonObject["state"]?.GetValue<string>();
+            string? city = jsonObject["city"]?.GetValue<string>();
+            string? street = jsonObject["street"]?.GetValue<string>();
+            string? housenumber = jsonObject["housenumber"]?.GetValue<string>();
+
+            LocationPreviewDescription description = new LocationPreviewDescription(name, country, osmKey, state,
+                                                                                    city, street, housenumber);
+            return new LocationPreview(description, latitude, longitude, minLongitude, maxLongitude, minLatitude, maxLatitude);
         }
 
         public static List<LocationPreview> ParsePreviewsFromJson(JsonObject jsonObject)
@@ -157,7 +169,7 @@ public class InfoGetter
     {
 
         string serverUrl = "https://graphhopper.com/api/1/geocode";
-        string locationRequest = "?q=" + Name + "&key=" + s_location_api_key;
+        string locationRequest = "?q=" + FormatNameForRequest(Name) + "&key=" + s_location_api_key;
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serverUrl + locationRequest);
         Task<HttpResponseMessage> locationPreviewTask = GetHttpClient().SendAsync(request);
         locationPreviewTask.Wait();
@@ -166,7 +178,12 @@ public class InfoGetter
         return LocationPreview.ParsePreviewsFromJson(jsonResponse);
     }
 
-public static LocationInfo GetLocationInfo(LocationPreview location)
+    private static string FormatNameForRequest(string name)
+    {
+        return name.Trim().Replace(" ", "+");
+    }
+
+    public static LocationInfo GetLocationInfo(LocationPreview location)
     {
         Task<HttpResponseMessage> weatherResponseTask = GetWeatherInLocation(location);
         Task<HttpResponseMessage> attractionsResponseTask = GetAttractionsInLocation(location);
@@ -248,4 +265,3 @@ public static LocationInfo GetLocationInfo(LocationPreview location)
         return GetHttpClient().SendAsync(places);
     }
 }
-

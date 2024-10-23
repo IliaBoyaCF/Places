@@ -117,6 +117,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SearchWindow";
             Text = "Search";
+            Load += SearchWindow_Load;
             ResumeLayout(false);
             PerformLayout();
         }

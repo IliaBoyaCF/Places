@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace PlacesWF
+﻿namespace PlacesWF
 {
     public partial class InfoWindow : Form
     {
@@ -24,17 +14,38 @@ namespace PlacesWF
         private void InfoWindow_Load(object sender, EventArgs e)
         {
             WeatherToFillLabel.Text = FormatWeather(_locationInfo.Weather);
+            SetListViewSchema();
+            PopulateListView();
+        }
+
+        private void SetListViewSchema()
+        {
+            InterestingPlacesList.View = View.Details;
+            InterestingPlacesList.Columns.Add("Name");
+            InterestingPlacesList.Columns.Add("Rating");
+            InterestingPlacesList.Columns.Add("Kinds");
+        }
+
+        private void PopulateListView()
+        {
+            if (_locationInfo.Attractions.Count == 0)
+            {
+                return;
+            }
             InterestingPlacesList.Items.AddRange(AttractionsAsListViewItems(_locationInfo.Attractions));
+            InterestingPlacesList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+            InterestingPlacesList.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.HeaderSize);
+            InterestingPlacesList.Columns[2].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
         private string FormatWeather(InfoGetter.LocationWeather weather)
         {
-            return $"{weather.Description}\n" +
+            return $"{char.ToUpper(weather.Description[0]) + weather.Description.Substring(1)}\n" +
                 $"Temperature: {weather.CurrentTemperature}°C\n" +
-                $"feels like: {weather.FeelsLike}°C" +
+                $"Feels like: {weather.FeelsLike}°C" +
                 $" Max: {weather.MaxTemp}°C Min: {weather.MinTemp}°C\n" +
-                $"Atmospheric pressure: {weather.Pressure * PressureConvertFactor}mmHg humidity: {weather.Humidity}%\n" +
-                $"Wind speed: {weather.WindSpeed}m/s direction: {weather.WindDirection}";
+                $"Atmospheric pressure: {weather.Pressure * PressureConvertFactor}mmHg Humidity: {weather.Humidity}%\n" +
+                $"Wind speed: {weather.WindSpeed}m/s direction: {weather.WindDirection.ToString().ToLower()}";
         }
 
         private static ListViewItem[] AttractionsAsListViewItems(List<InfoGetter.Attraction> attractions)
@@ -42,14 +53,22 @@ namespace PlacesWF
             ListViewItem[] items = new ListViewItem[attractions.Count];
             for (int i = 0; i < attractions.Count; i++)
             {
-                items[i] = new ListViewItem(FormatAttraction(attractions[i]));
+                items[i] = AttractionToListItem(attractions[i]);
             }
             return items;
         }
 
-        private static string FormatAttraction(InfoGetter.Attraction attraction)
+        private static ListViewItem AttractionToListItem(InfoGetter.Attraction attraction)
         {
-            return $"Name: {attraction.Name} rating: {attraction.rate}\nKinds: {attraction.kinds}";
+            ListViewItem row = new ListViewItem(attraction.Name);
+            row.SubItems.Add(ValueOrNotStated(attraction.rate.ToString()));
+            row.SubItems.Add(ValueOrNotStated(attraction.kinds));
+            return row;
+        }
+
+        private static string ValueOrNotStated(string? state)
+        {
+            return state ?? "no info";
         }
     }
 }
