@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Microsoft.Extensions.Configuration;
+using System.Globalization;
 using System.Text.Json.Nodes;
 
 namespace PlacesWF;
@@ -17,9 +18,25 @@ public class InfoGetter
 
     private static HttpClient _httpClient;
 
-    private static readonly string s_location_api_key = "381d7913-8163-4652-9c4f-625bf2c940b5";
-    private static readonly string s_places_api_key = "5ae2e3f221c38a28845f05b602e43603dc9a39a7feaf1a1b024356d9";
-    private static readonly string s_weather_api_key = "581aea581081f88840bc20df225ceb8e";
+    private static string s_location_api_key;
+    private static string s_places_api_key;
+    private static string s_weather_api_key;
+
+    public static void SetConfig(IConfigurationRoot configuration)
+    {
+        s_location_api_key = configuration["LocationApiKey"];
+        s_places_api_key = configuration["PlacesApiKey"];
+        s_weather_api_key = configuration["WeatherApiKey"];
+        if (IsConfigSet())
+        {
+            throw new ArgumentException("Provided configuration does not contain the necessary information.");
+        }
+    }
+
+    public static bool IsConfigSet()
+    {
+        return s_location_api_key == null || s_places_api_key == null || s_weather_api_key == null;
+    }
 
     private static HttpClient GetHttpClient()
     {
