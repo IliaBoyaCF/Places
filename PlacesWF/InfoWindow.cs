@@ -1,4 +1,6 @@
-﻿namespace PlacesWF
+﻿using PlacesWF.API_interaction;
+
+namespace PlacesWF
 {
     public partial class InfoWindow : Form
     {
@@ -38,17 +40,17 @@
             InterestingPlacesList.Columns[2].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
-        private string FormatWeather(InfoGetter.LocationWeather weather)
+        private string FormatWeather(WeatherForecast.LocationWeather weather)
         {
-            return $"{char.ToUpper(weather.Description[0]) + weather.Description.Substring(1)}\n" +
-                $"Temperature: {weather.CurrentTemperature}°C\n" +
-                $"Feels like: {weather.FeelsLike}°C" +
-                $" Max: {weather.MaxTemp}°C Min: {weather.MinTemp}°C\n" +
-                $"Atmospheric pressure: {weather.Pressure * PressureConvertFactor}mmHg Humidity: {weather.Humidity}%\n" +
-                $"Wind speed: {weather.WindSpeed}m/s direction: {weather.WindDirection.ToString().ToLower()}";
+            return $"{char.ToUpper(weather.GeneralInfo.Description[0]) + weather.GeneralInfo.Description.Substring(1)}\n" +
+                $"Temperature: {weather.TemperatureInfo.CurrentTemperature}°C\n" +
+                $"Feels like: {weather.TemperatureInfo.FeelsLike}°C" +
+                $" Max: {weather.TemperatureInfo.MaxTemp}°C Min: {weather.TemperatureInfo.MinTemp}°C\n" +
+                $"Atmospheric pressure: {weather.GeneralInfo.Pressure * PressureConvertFactor}mmHg Humidity: {weather.GeneralInfo.Humidity}%\n" +
+                $"Wind speed: {weather.WindInfo.WindSpeed}m/s direction: {weather.WindInfo.WindDirection.ToString().ToLower()}";
         }
 
-        private static ListViewItem[] AttractionsAsListViewItems(List<InfoGetter.Attraction> attractions)
+        private static ListViewItem[] AttractionsAsListViewItems(List<Attractions.Attraction> attractions)
         {
             ListViewItem[] items = new ListViewItem[attractions.Count];
             for (int i = 0; i < attractions.Count; i++)
@@ -58,7 +60,7 @@
             return items;
         }
 
-        private static ListViewItem AttractionToListItem(InfoGetter.Attraction attraction)
+        private static ListViewItem AttractionToListItem(Attractions.Attraction attraction)
         {
             ListViewItem row = new ListViewItem(attraction.Name);
             row.SubItems.Add(ValueOrNotStated(attraction.rate.ToString()));

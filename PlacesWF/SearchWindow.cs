@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+using PlacesWF.API_interaction;
 
 namespace PlacesWF
 {
     public partial class SearchWindow : Form
     {
 
-        private List<InfoGetter.LocationPreview> _locationPreviews = [];
+        private List<LocationByNameSearcher.LocationPreview> _locationPreviews = [];
 
         public SearchWindow()
         {
@@ -44,7 +44,7 @@ namespace PlacesWF
             }
         }
 
-        private static ListViewItem[] LocationPreviewsToListItem(List<InfoGetter.LocationPreview> locationPreviews)
+        private static ListViewItem[] LocationPreviewsToListItem(List<LocationByNameSearcher.LocationPreview> locationPreviews)
         {
             ListViewItem[] listViewItems = new ListViewItem[locationPreviews.Count];
             for (int i = 0; i < locationPreviews.Count; i++)
@@ -55,15 +55,15 @@ namespace PlacesWF
             return listViewItems;
         }
 
-        private static ListViewItem LocationPreviewToListItem(InfoGetter.LocationPreview locationPreview)
+        private static ListViewItem LocationPreviewToListItem(LocationByNameSearcher.LocationPreview locationPreview)
         {
             ListViewItem row = new ListViewItem($"{locationPreview.Description.Name}");
             row.SubItems.Add(ValueOrNotStated(locationPreview.Description.OSM_key));
             row.SubItems.Add($"{locationPreview.Description.Country}");
-            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.State));
-            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.City));
-            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.Street));
-            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.HouseNumber));
+            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.SpecificLocation.State));
+            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.SpecificLocation.City));
+            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.SpecificLocation.Street));
+            row.SubItems.Add(ValueOrNotStated(locationPreview.Description.SpecificLocation.HouseNumber));
 
             return row;
         }
